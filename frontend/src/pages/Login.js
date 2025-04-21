@@ -1,33 +1,40 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LucideUser, LucideKey, LucideShield } from "lucide-react";
+import { LucideUserCheck, LucideKeyRound, LucideShieldCheck } from "lucide-react";
+import Footer from "../components/Footer";
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Footer from "../components/Footer";
-const AdminLogin = () => {
+
+const Login = () => {
   const [loaded, setLoaded] = useState(false);
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
   // Load animations on mount
   useEffect(() => {
     setTimeout(() => setLoaded(true), 200);
   }, []);
 
-  const handleAdminLogin = async () => {
-    // Static credentials for admin login
-    const staticUsername = "simar";
-    const staticPassword = "12345";
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post('https://expensebackend-production.up.railway.app/api/auth/login', {
+        email,
+        password
+      });
 
-    if (username === staticUsername && password === staticPassword) {
-      // Store admin login status in localStorage
-      localStorage.setItem("isAdmin", "true");
+      // Store email in localStorage
+      localStorage.setItem("email", email);
 
-      // Redirect to admin dashboard
-      navigate('/admin/dashboard');
-    } else {
-      toast.error("Invalid username or password", {
+      console.log('Login successful:', response.data);
+
+      // Redirect to dashboard immediately after successful login
+      navigate('/user');
+
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Login failed. Please try again.";
+      toast.error(errorMessage, {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -35,6 +42,8 @@ const AdminLogin = () => {
         pauseOnHover: true,
         draggable: true,
       });
+
+      console.error('Login failed:', error.response ? error.response.data : error.message);
     }
   };
 
@@ -45,13 +54,13 @@ const AdminLogin = () => {
         <div
           className="relative w-1/2 hidden lg:flex items-center justify-center bg-cover bg-center transition-all duration-1000 ease-in-out transform hover:scale-105"
           style={{
-            backgroundImage: "url('https://img.lovepik.com/background/20211022/large/lovepik-simple-geometric-business-background-image_402009661.jpg')",
+            backgroundImage: "url('https://media.istockphoto.com/id/1335717953/photo/project-manager-working-on-computer-at-the-office-concept-with-icons-of-management-areas-such.jpg?s=612x612&w=0&k=20&c=HKKel0F9p7u9JL54sDOtYOuR1yVv81LA2ISHmuU7mdM=')",
           }}
         >
           <div className="absolute inset-0 bg-black bg-opacity-60"></div> {/* Dark Overlay */}
           <div className="relative text-white px-10 text-center">
             <h1 className="text-5xl font-extrabold leading-tight animate-float hover:animate-glow transition-all duration-700">
-              Admin <span className="text-indigo-400 animate-pulse">Dashboard</span>
+              Take Control of <span className="text-indigo-400 animate-pulse">Your Finances</span>
             </h1>
             <p className="mt-4 text-lg opacity-90 animate-slide-in hover:text-indigo-300 transition-all duration-700 hover:scale-105">
               Secure. Fast. Reliable.
@@ -59,34 +68,34 @@ const AdminLogin = () => {
           </div>
         </div>
 
-        {/* Right Side - Animated Admin Login Form */}
+        {/* Right Side - Animated Login Form */}
         <div className="w-full lg:w-1/2 flex items-center justify-center bg-gray-900 px-8 pt-20">
           <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-lg shadow-lg p-10 w-full max-w-md border border-gray-700 transform transition-all duration-700 ease-in-out hover:scale-[1.05] hover:shadow-indigo-500/50">
-            <h2 className="text-4xl font-semibold text-center mb-6 text-white animate-slide-up">Admin Login</h2>
+            <h2 className="text-4xl font-semibold text-center mb-6 text-white animate-slide-up">Login</h2>
 
             {/* Feature Icons - Smooth Floating */}
             <div className="flex justify-center space-x-6 mb-6">
               <div className="p-4 rounded-lg bg-gray-800 hover:bg-indigo-500 transition-all cursor-pointer animate-float hover:rotate-12 shadow-md hover:shadow-indigo-400/50">
-                <LucideUser size={26} color="white" />
+                <LucideUserCheck size={26} color="white" />
               </div>
               <div className="p-4 rounded-lg bg-gray-800 hover:bg-indigo-500 transition-all cursor-pointer animate-float delay-100 hover:rotate-12 shadow-md hover:shadow-indigo-400/50">
-                <LucideKey size={26} color="white" />
+                <LucideKeyRound size={26} color="white" />
               </div>
               <div className="p-4 rounded-lg bg-gray-800 hover:bg-indigo-500 transition-all cursor-pointer animate-float delay-200 hover:rotate-12 shadow-md hover:shadow-indigo-400/50">
-                <LucideShield size={26} color="white" />
+                <LucideShieldCheck size={26} color="white" />
               </div>
             </div>
 
             <p className="text-sm text-center mb-4 text-gray-300 animate-fade-in">
-              Enter your admin credentials to access the dashboard.
+              Enter your credentials to access your account.
             </p>
 
             {/* Input Fields with Smooth Neon Glow */}
             <input
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full p-3 mb-3 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-300 hover:ring-2 hover:ring-gray-500 animate-glow"
             />
             <input
@@ -97,9 +106,14 @@ const AdminLogin = () => {
               className="w-full p-3 mb-3 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-300 hover:ring-2 hover:ring-gray-500 animate-glow"
             />
 
+            {/* Forgot Password */}
+            <div className="text-sm text-center text-gray-400 hover:text-indigo-400 transition hover:animate-pulse">
+              <a href="#">Forgot password?</a>
+            </div>
+
             {/* Login Button - **ULTIMATE BUTTON ANIMATION!** */}
             <button 
-              onClick={handleAdminLogin}
+              onClick={handleLogin}
               className="relative w-full p-3 mt-6 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg shadow-lg overflow-hidden transition-all transform hover:scale-105 hover:shadow-indigo-500/50 active:scale-95 group"
             >
               <span className="relative z-10 text-lg font-semibold">LOGIN</span>
@@ -122,9 +136,10 @@ const AdminLogin = () => {
         draggable
         pauseOnHover
       />
+
       <Footer />
     </>
   );
 };
 
-export default AdminLogin;
+export default Login;
