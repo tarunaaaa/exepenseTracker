@@ -89,5 +89,43 @@ router.delete("/:id", async (req, res) => {
         res.status(500).json({ message: "Server error", error });
     }
 });
+// ➤ Get Transactions Grouped by Month for Logged-in User
+router.get("/summary/monthly", async (req, res) => {
+    try {
+        const email = req.query.email;
+        if (!email) return res.status(400).json({ message: "Email is required" });
+
+        const transactions = await Transaction.find({ email }).sort({ date: -1 });
+
+        // Group transactions by Year-Month
+        const monthlySummary = {};
+
+        transactions.forEach((txn) => {
+            const date = new Date(txn.date);
+            const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+
+            if (!monthlySummary[yearMonth]) {
+                monthlySummary[yearMonth] = {
+                    income: 0,
+                    expense: 0,
+                    transactions: []
+                };
+            }
+
+            if (txn.type === "income") {
+                monthlySummary[yearMonth].income += txn.amount;
+            } else if (txn.type === "expense") {
+                monthlySummary[yearMonth].expense += txn.amount;
+            }
+
+            monthlySummary[yearMonth].transactions.push(txn);
+        });
+
+        res.json(monthlySummary);
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error });
+    }
+});
+
 
 module.exports = router;

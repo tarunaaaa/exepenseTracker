@@ -6,10 +6,48 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+const LoginSuccessPopup = ({ onClose }) => {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-70 backdrop-blur-sm">
+      <div className="relative bg-gray-800 border border-indigo-500 rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl animate-pop-in">
+        {/* Gradient circle decoration */}
+        <div className="absolute -top-12 -right-12 w-24 h-24 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full opacity-20 blur-xl"></div>
+        
+        {/* Main content */}
+        <div className="text-center">
+          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-indigo-500 mb-4">
+            <svg
+              className="h-10 w-10 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          </div>
+          <h3 className="text-2xl font-bold text-white mb-2">Welcome Back!</h3>
+          <p className="text-gray-300 mb-6">
+            You've successfully logged in. Redirecting to your dashboard...
+          </p>
+          <div className="w-full bg-gray-700 rounded-full h-2.5">
+            <div className="bg-indigo-600 h-2.5 rounded-full animate-progress"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Login = () => {
   const [loaded, setLoaded] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const navigate = useNavigate();
 
   // Load animations on mount
@@ -28,9 +66,14 @@ const Login = () => {
       localStorage.setItem("email", email);
 
       console.log('Login successful:', response.data);
-
-      // Redirect to dashboard immediately after successful login
-      navigate('/user');
+      
+      // Show success popup
+      setShowSuccessPopup(true);
+      
+      // Redirect after 3 seconds
+      setTimeout(() => {
+        navigate('/user');
+      }, 3000);
 
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Login failed. Please try again.";
@@ -124,6 +167,9 @@ const Login = () => {
         </div>
       </div>
 
+      {/* Success Popup */}
+      {showSuccessPopup && <LoginSuccessPopup />}
+
       {/* Toast Container for Error Messages Only */}
       <ToastContainer
         position="top-right"
@@ -135,6 +181,7 @@ const Login = () => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
+        theme="dark"
       />
 
       <Footer />
